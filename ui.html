@@ -1,0 +1,110 @@
+<link rel="stylesheet" href="https://unpkg.com/figma-plugin-ds@1.0.1/dist/figma-plugin-ds.css">
+<style>
+.content { display: flex; }
+.icon--swap { animation: rotate 1s linear infinite; }
+.hide { display: none; }
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<div id="app">
+  <div class="field">
+    <label for="" class="label">请输入图片尺寸：</label>
+    <div class="content" style="padding-left: 10px;">
+      <div class="input">
+        <input type="input" class="input__field" placeholder="宽" name="width">
+      </div>
+      <div class="label" style="flex:0;">×</div>
+      <div class="input">
+        <input type="input" class="input__field" placeholder="高" name="height">
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label for="" class="label">请选择图片分类：</label>
+    <div class="content">
+      <div class="radio">
+        <input id="radioButton1" type="radio" class="radio__button" value="any" name="category" checked>
+        <label for="radioButton1" class="radio__label">全部</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton2" type="radio" class="radio__button" value="animals" name="category" >
+        <label for="radioButton2" class="radio__label">动物</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton3" type="radio" class="radio__button" value="arch" name="category" >
+        <label for="radioButton3" class="radio__label">建筑</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton4" type="radio" class="radio__button" value="nature" name="category" >
+        <label for="radioButton4" class="radio__label">自然</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton5" type="radio" class="radio__button" value="people" name="category" >
+        <label for="radioButton5" class="radio__label">任务</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton6" type="radio" class="radio__button" value="tech" name="category" >
+        <label for="radioButton6" class="radio__label">科技</label>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label for="" class="label">请选择图片滤镜：</label>
+    <div class="content">
+      <div class="radio">
+        <input id="radioButton7" type="radio" class="radio__button" value="none" name="filter" checked>
+        <label for="radioButton7" class="radio__label">正常</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton8" type="radio" class="radio__button" value="grayscale" name="filter" >
+        <label for="radioButton8" class="radio__label">黑白照</label>
+      </div>
+      <div class="radio">
+        <input id="radioButton9" type="radio" class="radio__button" value="sepia" name="filter" >
+        <label for="radioButton9" class="radio__label">老照片</label>
+      </div>
+    </div>
+  </div>
+  <div class="field" style="padding:0 10px;">
+    <div id="create" class="icon-button" style="width: 100%;">
+      <div class="icon icon--image"></div>
+      <div class="type type--small type--medium type--inverse">插入</div>
+    </div>
+    <div class="icon-button loading hide" style="width: 100%;">
+      <div class="icon icon--swap"></div>
+    </div>
+  </div>
+</div>
+<script>
+async function loadImage(url) {
+  const resp = await fetch('http://localhost:3000/' + url);
+  const buffer = await resp.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+document.getElementById('create').onclick = async (e) => {
+  const width = parseInt(document.querySelector('input[name="width"]').value);
+  const height = parseInt(document.querySelector('input[name="height"]').value);
+  const category = document.querySelector('input[name="category"]:checked').value;
+  const filter = document.querySelector('input[name="filter"]:checked').value;
+  const loading = document.querySelector('.icon-button.loading');
+
+  e.target.classList.add('hide');
+  loading.classList.remove('hide');
+  
+  const imgBytes = await loadImage(`https://placeimg.com/${width}/${height}/${category}/${filter}`);
+  parent.postMessage({ pluginMessage: { type: 'insert', bytes: imgBytes, width: width, height: height } }, '*');
+
+  loading.classList.add('hide');
+  e.target.classList.remove('hide');
+}
+
+window.onmessage = function(e) {
+  if (e.data.pluginMessage.type === 'update') {
+    document.querySelector('input[name="width"]').value = e.data.pluginMessage.width;
+    document.querySelector('input[name="height"]').value = e.data.pluginMessage.height;
+  }
+}
+</script>
