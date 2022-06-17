@@ -91,14 +91,14 @@ document.getElementById('create').onclick = async (e) => {
   const filter = document.querySelector('input[name="filter"]:checked').value;
   const loading = document.querySelector('.icon-button.loading');
 
-  e.target.classList.add('hide');
+  e.currentTarget.classList.add('hide');
   loading.classList.remove('hide');
   
   const imgBytes = await loadImage(`https://placeimg.com/${width}/${height}/${category}/${filter}`);
   parent.postMessage({ pluginMessage: { type: 'insert', bytes: imgBytes, width: width, height: height } }, '*');
 
   loading.classList.add('hide');
-  e.target.classList.remove('hide');
+  e.currentTarget?.classList.remove('hide');
 }
 
 window.onmessage = function(e) {
